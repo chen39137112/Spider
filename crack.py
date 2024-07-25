@@ -18,10 +18,12 @@ class Crack(object):
     """
 
     def __init__(self, driver: WebPage):
-        self.url = 'https://ebid.espic.com.cn/newgdtcms//category/purchaseListNew.html?dates=300&categoryId=2&tenderMethod=00&tabName=采购信息&page=1'
         self.browser = driver
         self.table = [0 if _ < 50 else 1 for _ in range(256)]
         self.width = 250
+
+        self.browser.listen.start('https://ebid.espic.com.cn//resource/gdtNew/images/Pic')
+        logger.info("开始监听滑块背景图片")
 
     def get_images(self):
         """
@@ -162,11 +164,10 @@ class Crack(object):
 
         action.release()
 
-    def crack(self, n):
-
+    def crack(self, url):
         # 打开浏览器
-        self.browser.listen.start('https://ebid.espic.com.cn//resource/gdtNew/images/Pic')
-        self.browser.get(self.url)
+
+        self.browser.get(url)
         ret = self.browser.wait.eles_loaded("#captcha", timeout=10)
 
         if ret:
@@ -192,8 +193,14 @@ class Crack(object):
                 return False
 
         else:
-            logger.info("验证成功")
-            return True
+            if self.browser.ele('.newslist'):
+                logger.info("验证成功")
+                return True
+            return False
+
+    def __del__(self):
+        self.browser.listen.stop()
+        logger.info("停止监听滑块背景图片")
 
 
 if __name__ == '__main__':
@@ -202,7 +209,7 @@ if __name__ == '__main__':
     crack = Crack(driver)
     count = 0
     for i in range(20):
-        if crack.crack(i):
+        if crack.crack():
             time.sleep(1)
             count += 1
     print(f"成功率：{count / 20 * 100}%")
