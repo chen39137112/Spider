@@ -9,7 +9,7 @@ from DrissionPage.common import Actions
 from PIL import ImageChops, PngImagePlugin, Image
 from io import BytesIO
 
-from utils import init, logger
+from utils import logger
 
 
 class Crack(object):
@@ -204,8 +204,8 @@ class Crack(object):
 
 
 if __name__ == '__main__':
-    print('开始验证')
-    driver = init()
+    from utils import get_driver
+    driver = get_driver()
     crack = Crack(driver)
     count = 0
     for i in range(20):

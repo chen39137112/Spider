@@ -1,11 +1,11 @@
 import logging
 import logging.handlers
-from pathlib import Path
+
 from functools import wraps
 import traceback
 import re
 
-from DrissionPage import WebPage, ChromiumOptions
+from DrissionPage import ChromiumPage, ChromiumOptions
 import pymysql
 
 
@@ -25,6 +25,35 @@ def set_logger():
     return logger
 
 
+def get_keywords(db: pymysql.Connection) -> list[str]:
+    with db.cursor() as cursor:
+        cursor.execute("select keywords from reptile_keywords;")
+        return [_[0] for _ in cursor.fetchall()]
+
+
+def get_ex_keys(db: pymysql.Connection) -> list[str]:
+    with db.cursor() as cursor:
+        cursor.execute("select keywords from exclude_keywords;")
+        return [_[0] for _ in cursor.fetchall()]
+
+
+def get_last_step(db: pymysql.Connection, website_id) -> str:
+    with db.cursor() as cursor:
+        cursor.execute("SELECT last_step FROM reptile_time "
+                       f"WHERE website_id = {website_id} "
+                       "ORDER BY last_time DESC "
+                       "LIMIT 1;")
+        result = cursor.fetchone()
+        return result[0] if result else ''
+
+
+def get_site_info(db: pymysql.Connection):
+    with db.cursor() as cursor:
+        cursor.execute("SELECT id, website_name, website_timeline FROM reptile_website "
+                       f"WHERE website_isUse = 1;")
+        return cursor.fetchall()
+
+
 def kw_matching(content: str, ex_keys, keywords) -> str:
     for ex_key in ex_keys:
         if ex_key in content:
@@ -34,6 +63,7 @@ def kw_matching(content: str, ex_keys, keywords) -> str:
         if key in content:
             ret.append(key)
     return ','.join(ret)
+
 
 def get_zb_ask(content: str):
     idx = content.find('投标人资格')
@@ -75,6 +105,7 @@ def trace_debug(func):
         except:
             logger.error(traceback.format_exc())
             return False
+
     return wrapper
 
 
@@ -87,18 +118,15 @@ def connect_db():
                            charset='utf8mb3')
 
 
-def init():
-    Path('./tmp').mkdir(parents=True, exist_ok=True)
-    Path('./log').mkdir(parents=True, exist_ok=True)
-
-    co = ChromiumOptions()
+def get_driver(port):
+    co = ChromiumOptions().set_local_port(port)
     co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-    co.headless(True)
-    co.no_imgs(True)
-    driver = WebPage(chromium_options=co)
-    driver.set.blocked_urls('*.css*')
+    # co.headless(True)
+    # co.no_imgs(True)
+
+    driver = ChromiumPage(co)
+    # driver.set.blocked_urls('*.css*')
     return driver
 
 
-driver = init()
 logger = set_logger()

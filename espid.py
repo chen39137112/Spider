@@ -1,9 +1,6 @@
 import time
 from datetime import datetime
 from datetime import timedelta
-import re
-
-from DrissionPage import WebPage
 
 from crack import Crack
 from save import RecordMain, RecordContent, Saver
@@ -11,7 +8,7 @@ from utils import logger, trace_debug, kw_matching, get_zb_ask, string_truncate
 
 
 class Espid:
-    def __init__(self, website_id, driver: WebPage, last_bid_num, keywords: list[str], ex_keys: list[str],
+    def __init__(self, website_id, driver, last_bid_num, keywords: list[str], ex_keys: list[str],
                  timeline: int):
         self.id = website_id
         self.browser = driver
@@ -131,11 +128,11 @@ class Espid:
 
 
 if __name__ == '__main__':
-    from utils import init
+    from utils import get_driver
 
     website_id = 1
+    driver = get_driver(10001)
     last_bid_num = '-1'
-    driver = init()
     keywords = ["软件", "设计"]
     ex_keys = ['中标公告']
     espid = Espid(website_id, driver, last_bid_num, keywords, ex_keys, 2)
