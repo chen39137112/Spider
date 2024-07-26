@@ -125,6 +125,8 @@ def get_driver(port):
     co = ChromiumOptions().set_local_port(port)
     co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
     co.headless(True)
+    co.set_argument('--incognito')
+    co.set_argument('--no-sandbox')
     co.no_imgs(True)
 
     driver = ChromiumPage(co)
