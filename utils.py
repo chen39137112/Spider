@@ -121,11 +121,11 @@ def connect_db():
 def get_driver(port):
     co = ChromiumOptions().set_local_port(port)
     co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-    # co.headless(True)
-    # co.no_imgs(True)
+    co.headless(True)
+    co.no_imgs(True)
 
     driver = ChromiumPage(co)
-    # driver.set.blocked_urls('*.css*')
+    driver.set.blocked_urls('*.css*')
     return driver
 
 

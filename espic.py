@@ -7,7 +7,7 @@ from save import RecordMain, RecordContent, Saver
 from utils import logger, trace_debug, kw_matching, get_zb_ask, string_truncate
 
 
-class Espid:
+class Espic:
     def __init__(self, website_id, driver, last_bid_num, keywords: list[str], ex_keys: list[str],
                  timeline: int):
         self.id = website_id
@@ -85,6 +85,7 @@ class Espid:
 
     @trace_debug
     def run(self):
+        logger.info("开始爬取国家电投集团...")
         page = 1
         self.browser.get(self.url.format(page))
         # 尝试破解，若非预期原因失败，程序崩溃
@@ -124,6 +125,7 @@ class Espid:
             break
 
         self.saver.save()
+        logger.info("国家电投集团爬取结束")
         return True
 
 
@@ -135,5 +137,5 @@ if __name__ == '__main__':
     last_bid_num = '-1'
     keywords = ["软件", "设计"]
     ex_keys = ['中标公告']
-    espid = Espid(website_id, driver, last_bid_num, keywords, ex_keys, 2)
+    espid = Espic(website_id, driver, last_bid_num, keywords, ex_keys, 2)
     espid.run()

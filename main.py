@@ -3,7 +3,8 @@ from pathlib import Path
 
 from DrissionPage import WebPage, ChromiumOptions
 
-from espid import Espid
+from cnncecp import Cnncecp
+from espic import Espic
 from utils import (get_driver,
                    get_keywords,
                    get_ex_keys,
@@ -12,9 +13,9 @@ from utils import (get_driver,
                    connect_db)
 
 method_tab = {
-    "中核集团": '',
+    "中核集团": Cnncecp,
     "中广核集团": '',
-    "国家电投集团": Espid,
+    "国家电投集团": Espic,
     "中国华能": '',
     "军队采购网": '',
 }
@@ -42,11 +43,13 @@ def main():
         threads.append(t)
         t.start()
 
+    # todo 捕获线程返回值，若为false需重试几次
     for t in threads:
         t.join()
 
     for page in pages:
         page.quit()
+    db.close()
 
 
 if __name__ == '__main__':
