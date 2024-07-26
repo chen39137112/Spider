@@ -1,7 +1,4 @@
 from threading import Thread
-from pathlib import Path
-
-from DrissionPage import WebPage, ChromiumOptions
 
 from cnncecp import Cnncecp
 from espic import Espic
@@ -22,8 +19,6 @@ method_tab = {
 
 
 def main():
-    Path('./tmp').mkdir(parents=True, exist_ok=True)
-    Path('./log').mkdir(parents=True, exist_ok=True)
     db = connect_db()
     keywords = get_keywords(db)
     ex_keys = get_ex_keys(db)

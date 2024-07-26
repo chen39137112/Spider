@@ -1,12 +1,15 @@
 import logging
 import logging.handlers
-
+from pathlib import Path
 from functools import wraps
 import traceback
 import re
 
 from DrissionPage import ChromiumPage, ChromiumOptions
 import pymysql
+
+Path('./tmp').mkdir(parents=True, exist_ok=True)
+Path('./log').mkdir(parents=True, exist_ok=True)
 
 
 def set_logger():
