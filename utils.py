@@ -78,15 +78,21 @@ def get_zb_ask(content: str):
 
     if len(zb_num) == 1:
         nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
+        linefeed = zb_num + sub_str[match.end()]
     elif len(zb_num) == 2 and zb_num[0] == '0':
         nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
+        linefeed = zb_num[1] + sub_str[match.end()]
     elif len(zb_num) == 3:
         nx_num = str(float(zb_num) + 0.1)
+        linefeed = zb_num
     else:
-        raise Exception('非预期中的投标资格编号！')
+        logger.warning('非预期中的投标资格编号！')
+        return ''
 
     nx_idx = content[idx:].find(nx_num)
-    return content[idx: idx + nx_idx]
+    if nx_idx == -1:
+        return ''
+    return content[idx: idx + nx_idx].replace(linefeed, '\n' + linefeed)
 
 
 def string_truncate(s, max_bytes=65536, encoding='utf-8'):
