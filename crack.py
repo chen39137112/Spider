@@ -186,10 +186,10 @@ class Crack(object):
 
             ret = self.browser.wait.eles_loaded(".newslist", timeout=10)
             if ret:
-                logger.info('验证成功\n')
+                logger.info('验证成功!\n')
                 return True
             else:
-                logger.info('验证失败\n')
+                logger.info('验证失败!\n')
                 return False
 
         else:
