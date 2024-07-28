@@ -4,7 +4,12 @@ from datetime import timedelta
 
 from crack import Crack
 from save import RecordMain, RecordContent, Saver
-from utils import logger, trace_debug, kw_matching, get_zb_ask, string_truncate
+from utils import (logger,
+                   trace_debug,
+                   kw_matching,
+                   get_zb_ask,
+                   string_truncate,
+                   save_annex_2_local)
 
 
 class Espic:
@@ -72,12 +77,16 @@ class Espic:
 
         # 匹配到了关键字
         logger.info(f"匹配到关键字：{keywords}")
+        title = ele.child().property('title')
+        logger.info(f"附件保存路径：{save_annex_2_local(pages, self.id, title)}")
+
         main_info = RecordMain(website_id=self.id,
                                reptile_keywords=keywords,
-                               title=ele.child().property('title'),
+                               title=title,
                                website_time=datetime.strptime(ele.ele('.newsDate').text, '%Y-%m-%d'),
                                website_url=url
                                )
+        # todo zb_ask格式化、保存图片到本地
         content_info = RecordContent(zb_ask=get_zb_ask(content), reptile_content=string_truncate(content))
         self.saver.add_main(main_info)
         self.saver.add_content(content_info)
