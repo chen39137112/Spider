@@ -134,20 +134,20 @@ def save_annex_2_local(pages, website_id, title):
     parent = f'./annex/{today}/{website_id}/{title}'
     Path(parent).mkdir(parents=True, exist_ok=True)
     for i, page in enumerate(pages):
-        page.ele('.textLayer').get_screenshot(path=parent, name=f'{i + 1}.png')
+        page.ele('.canvasWrapper').get_screenshot(path=parent, name=f'{i + 1}.png')
     return parent
 
 
 def get_driver(port):
     co = ChromiumOptions().set_local_port(port)
     co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-    # co.headless(True)
-    # co.set_argument('--incognito')
-    # co.set_argument('--no-sandbox')
-    # co.no_imgs(True)
+    co.headless(True)
+    co.set_argument('--incognito')
+    co.set_argument('--no-sandbox')
+    co.no_imgs(True)
 
     driver = ChromiumPage(co)
-    # driver.set.blocked_urls('*.css*')
+    driver.set.blocked_urls('*.css*')
     return driver
 
 
