@@ -45,7 +45,9 @@ class Espic:
     def check(self, ele):
         url = ele.child().property('href')
         logger.info(f"开始搜索{url}")
-        tab = self.browser.new_tab(url)
+        tab = self.browser.new_tab()
+        tab.set.blocked_urls('*.css*')
+        tab.get(url)
         # 测试用
         # self.browser.get("https://ebid.espic.com.cn/sdny_bulletin/2024-07-22/599926.html")
         # iframe = self.browser.get_frame('#pdfContainer')
@@ -78,7 +80,7 @@ class Espic:
         # 匹配到了关键字
         logger.info(f"匹配到关键字：{keywords}")
         title = ele.child().property('title')
-        logger.info(f"附件保存路径：{save_annex_2_local(pages, self.id, title)}")
+        logger.info(f"附件保存路径：{save_annex_2_local(tab.eles('.page'), self.id, title)}")
 
         main_info = RecordMain(website_id=self.id,
                                reptile_keywords=keywords,

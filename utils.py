@@ -134,7 +134,10 @@ def save_annex_2_local(pages, website_id, title):
     parent = f'./annex/{today}/{website_id}/{title}'
     Path(parent).mkdir(parents=True, exist_ok=True)
     for i, page in enumerate(pages):
-        page.ele('.canvasWrapper').get_screenshot(path=parent, name=f'{i + 1}.png')
+        if not page.attr('data-loaded'):
+            page.scroll.to_see()
+            page.wait(0.5)
+        page.get_screenshot(path=parent, name=f'{i + 1}.png')
     return parent
 
 
