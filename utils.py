@@ -137,7 +137,7 @@ def save_annex_2_local(pages, website_id, title):
         if not page.attr('data-loaded'):
             page.scroll.to_see()
             page.wait(0.5)
-        if page.attr('data-loaded') == 'true':
+        else:
             page.get_screenshot(path=parent, name=f'{i + 1}.png')
     return parent
 
