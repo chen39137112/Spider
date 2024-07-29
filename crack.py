@@ -168,7 +168,7 @@ class Crack(object):
         # 打开浏览器
 
         self.browser.get(url)
-        ret = self.browser.wait.eles_loaded("#captcha", timeout=10)
+        ret = self.browser.wait.eles_loaded("#captcha", timeout=5)
 
         if ret:
             # 获取图片
