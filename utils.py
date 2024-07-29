@@ -5,6 +5,7 @@ from pathlib import Path
 from functools import wraps
 import traceback
 import re
+import os
 
 from DrissionPage import ChromiumPage, ChromiumOptions
 import pymysql
@@ -154,6 +155,11 @@ def get_driver(port):
     co = ChromiumOptions().set_local_port(port)
     co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
     co.headless(True)
+    if os.name != 'posix':
+        useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
+    else:
+        useragent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
+    co.set_user_agent(user_agent=useragent)
     co.set_argument('--incognito')
     co.set_argument('--no-sandbox')
     co.no_imgs(True)

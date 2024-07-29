@@ -138,6 +138,7 @@ class Espic:
             break
 
         self.saver.save()
+        self.browser.quit()
         logger.info("国家电投集团爬取结束")
         return True
 
