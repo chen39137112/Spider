@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from crack import Crack
-from save import RecordMain, RecordContent, Saver
+from save import RecordMain, RecordContent, RecordAnnex, Saver
 from utils import (logger,
                    trace_debug,
                    kw_matching,
@@ -80,18 +80,20 @@ class Espic:
         title = ele.child().property('title')
         # 缩小视图可保证截图完整
         tab.ele('#scaleSelect').select('50%')
-        logger.info(f"附件保存路径：{save_annex_2_local(tab.eles('.page'), self.id, title)}")
+        annex_path = save_annex_2_local(tab.eles('.page'), self.id, title)
 
+        annex_info = RecordAnnex(annex_url=annex_path, annex_type=2)
         main_info = RecordMain(website_id=self.id,
                                reptile_keywords=keywords,
                                title=title,
                                website_time=datetime.strptime(ele.ele('.newsDate').text, '%Y-%m-%d'),
                                website_url=url
                                )
-        # todo zb_ask格式化、保存图片到本地
         content_info = RecordContent(zb_ask=get_zb_ask(content), reptile_content=string_truncate(content))
+
         self.saver.add_main(main_info)
         self.saver.add_content(content_info)
+        self.saver.add_annex(annex_info)
         tab.close()
 
     @trace_debug
@@ -106,9 +108,9 @@ class Espic:
         bid_num = eles[0].ele('.col').child().text
         self.saver.bid_num = bid_num
         page += 1
+        today = datetime.today()
 
         while True:
-            today = datetime.today()
             for ele in eles:
                 if today - datetime.strptime(ele.ele('.newsDate').text, '%Y-%m-%d') > self.line:
                     logger.info("已到达时效日期，本次爬取结束")

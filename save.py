@@ -37,11 +37,25 @@ class RecordContent:
     reptile_content: str
 
 
+@dataclass
+class RecordAnnex:
+    """
+    要保存的内容：
+      `id` int NOT NULL AUTO_INCREMENT,
+      `main_id` int NULL DEFAULT NULL COMMENT '关联主表ID（关联reptile_main表）',
+      `annex_url` varchar(555) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '附件链接',
+      `annex_type` int NULL DEFAULT NULL COMMENT '附件类型（1为附件，2为图片）',
+    """
+    annex_url: str
+    annex_type: int
+
+
 class Saver:
     def __init__(self, website_id):
         self.db = connect_db()
         self.main: list[RecordMain] = []
         self.content: list[RecordContent] = []
+        self.annex: list[RecordAnnex] = []
         self.id = website_id
         self.bid_num = -1
 
@@ -50,6 +64,9 @@ class Saver:
 
     def add_content(self, record: RecordContent):
         self.content.append(record)
+
+    def add_annex(self, record: RecordAnnex):
+        self.annex.append(record)
 
     def insert(self, cursor, table, info: dict):
         cols = []
@@ -66,13 +83,16 @@ class Saver:
         cursor = self.db.cursor()
         self.db.begin()
         try:
-            for main_info, content in zip(self.main, self.content):
+            for main_info, content, annex in zip(self.main, self.content, self.annex):
                 main_dict = asdict(main_info)
                 content_dict = asdict(content)
+                annex_dict = asdict(annex)
 
                 main_id = self.insert(cursor, 'reptile_main', main_dict)
                 content_dict['reptile_main_id'] = main_id
+                annex_dict['main_id'] = main_id
                 self.insert(cursor, 'reptile_content', content_dict)
+                self.insert(cursor, 'reptile_annex', annex_dict)
 
             self.insert(cursor, 'reptile_time', {'last_time': datetime.today(),
                                                  'website_id': self.id,
