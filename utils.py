@@ -93,8 +93,16 @@ def get_zb_ask(content: str):
 
     nx_idx = content[idx:].find(nx_num)
     if nx_idx == -1:
-        return ''
-    return content[idx: idx + nx_idx].replace(linefeed, '\n' + linefeed)
+        nx_idx = content[idx:].find("招标文件的获取") - 2
+    ret = content[idx: idx + nx_idx]
+    i = 0
+    while i < len(ret):
+        s = ret[i]
+        if s == '；' or s == '。' or s == '：':
+            i += 1
+            ret = ret[:i] + '\n' + ret[i:]
+        i += 1
+    return ret
 
 
 def string_truncate(s, max_bytes=65536, encoding='utf-8'):
