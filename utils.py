@@ -153,12 +153,15 @@ def save_annex_2_local(pages, website_id, title):
 
 def get_driver(port):
     co = ChromiumOptions().set_local_port(port)
-    co.set_browser_path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
-    co.headless(True)
     if os.name != 'posix':
+        browser_path = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
         useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
     else:
+        browser_path = "/usr/bin/google-chrome"
         useragent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
+
+    co.headless(True)
+    co.set_browser_path(browser_path)
     co.set_user_agent(user_agent=useragent)
     co.set_argument('--incognito')
     co.set_argument('--no-sandbox')
