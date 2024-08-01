@@ -1,4 +1,6 @@
 from threading import Thread
+from datetime import datetime, timedelta
+import time
 
 from cnncecp import Cnncecp
 from espic import Espic
@@ -16,9 +18,7 @@ method_tab = {
 class Spider:
     def __init__(self):
         self.db = connect_db()
-        self.keywords = self.get_keywords()
-        self.ex_keys = self.get_ex_keys()
-        self.websites = self.get_site_info()
+
 
     def get_keywords(self) -> list[str]:
         with self.db.cursor() as cursor:
@@ -57,18 +57,50 @@ class Spider:
                 break
         page.quit()
 
+    def waiting(self):
+        with self.db.cursor() as cursor:
+            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            now = datetime.now()
+            seconds = (now - today_start).total_seconds()
+
+            cursor.execute("SELECT timeSwitch FROM reptile_timeswitch ORDER BY timeSwitch")
+            times = [_[0].total_seconds() for _ in cursor.fetchall()]
+            # 防止有0点导致无法触发
+            if times[0] == 0:
+                times.pop(0)
+                times.append(timedelta(hours=24).total_seconds())
+            times = [t - seconds for t in times]
+
+            t = times.pop()
+            while t > 0:
+                if times[-1] > 0:
+                    t = times.pop()
+                else:
+                    break
+
+            if t < 0 or t > 60:
+                time.sleep(10)
+                return False
+            if t <= 60:
+                time.sleep(t)
+                return True
+
     def run(self):
-        threads = []
+        while True:
+            if not self.waiting():
+                continue
+            self.keywords = self.get_keywords()
+            self.ex_keys = self.get_ex_keys()
+            self.websites = self.get_site_info()
+            threads = []
 
-        for site in self.websites:
-            t = Thread(target=self.crawling, args=(site,))
-            threads.append(t)
-            t.start()
+            for site in self.websites:
+                t = Thread(target=self.crawling, args=(site,))
+                threads.append(t)
+                t.start()
 
-        for t in threads:
-            t.join()
-
-        self.db.close()
+            for t in threads:
+                t.join()
 
 
 if __name__ == '__main__':
