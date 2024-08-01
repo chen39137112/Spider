@@ -44,7 +44,7 @@ class Espic:
 
     def check(self, ele):
         url = ele.child().property('href')
-        logger.info(f"开始搜索{url}")
+        logger.info(f"电投:开始搜索{url}")
         tab = self.browser.new_tab(url)
         # 测试用
         # self.browser.get("https://ebid.espic.com.cn/sdny_bulletin/2024-07-22/599926.html")
@@ -53,14 +53,15 @@ class Espic:
         iframe = tab.get_frame('#pdfContainer')
         tab.get(iframe.url)
 
+        # 等待pdf加载完成
         for _ in range(3):
-            time.sleep(3)
-            if tab.ele("#numPages").text != '/ 0':
+            ret = tab.wait.eles_loaded('.page')
+            if ret:
                 break
             tab.refresh()
         else:
-            # todo 抛异常/跳过该条？
-            raise Exception(f"frame页面加载失败，url:{url}")
+            logger.warning(f"电投:frame页面加载超时-{url}")
+            return
 
         pages = tab.eles('.page')
         texts = []
@@ -76,7 +77,7 @@ class Espic:
             return
 
         # 匹配到了关键字
-        logger.info(f"匹配到关键字：{keywords}")
+        logger.info(f"电投:匹配到关键字：{keywords}")
         title = ele.child().property('title')
         # 缩小视图可保证截图完整
         tab.ele('#scaleSelect').select('50%')
@@ -97,8 +98,8 @@ class Espic:
         tab.close()
 
     @trace_debug
-    def run(self):
-        logger.info("开始爬取国家电投集团...")
+    def run(self, count):
+        logger.info(f"开始爬取国家电投集团({count})...")
         page = 1
         self.browser.get(self.url.format(page))
         # 尝试破解，若非预期原因失败，程序崩溃
@@ -152,4 +153,4 @@ if __name__ == '__main__':
     keywords = ["软件", "设计"]
     ex_keys = ['中标公告']
     espid = Espic(website_id, driver, last_bid_num, keywords, ex_keys, 2)
-    espid.run()
+    espid.run(1)

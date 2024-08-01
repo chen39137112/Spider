@@ -31,43 +31,20 @@ def set_logger():
     return logger
 
 
-def get_keywords(db: pymysql.Connection) -> list[str]:
-    with db.cursor() as cursor:
-        cursor.execute("select keywords from reptile_keywords;")
-        return [_[0] for _ in cursor.fetchall()]
-
-
-def get_ex_keys(db: pymysql.Connection) -> list[str]:
-    with db.cursor() as cursor:
-        cursor.execute("select keywords from exclude_keywords;")
-        return [_[0] for _ in cursor.fetchall()]
-
-
-def get_last_step(db: pymysql.Connection, website_id) -> str:
-    with db.cursor() as cursor:
-        cursor.execute("SELECT last_step FROM reptile_time "
-                       f"WHERE website_id = {website_id} "
-                       "ORDER BY last_time DESC "
-                       "LIMIT 1;")
-        result = cursor.fetchone()
-        return result[0] if result else ''
-
-
-def get_site_info(db: pymysql.Connection):
-    with db.cursor() as cursor:
-        cursor.execute("SELECT id, website_name, website_timeline FROM reptile_website "
-                       f"WHERE website_isUse = 1;")
-        return cursor.fetchall()
-
-
 def kw_matching(content: str, ex_keys, keywords) -> str:
+    """
+    使用正则匹配，防止关键词被换行符打断
+    """
+    ex_keys = ['(\n)?'.join(list(key)) for key in ex_keys]
+    kw_patterns = ['(\n)?'.join(list(key)) for key in keywords]
     for ex_key in ex_keys:
-        if ex_key in content:
+        if re.search(ex_key, content):
             return ''
+
     ret = []
-    for key in keywords:
-        if key in content:
-            ret.append(key)
+    for i, key in enumerate(kw_patterns):
+        if re.search(key, content):
+            ret.append(keywords[i])
     return ','.join(ret)
 
 
@@ -148,6 +125,16 @@ def save_annex_2_local(pages, website_id, title):
             page.wait(0.5)
         if page.attr('data-loaded'):
             page.ele('.canvasWrapper').get_screenshot(path=parent, name=f'{i + 1}.png')
+    return parent
+
+
+def download_annex_2_local(tab, website_id, title, flag):
+    today = datetime.today().strftime('%Y-%m-%d')
+    parent = f'./annex/{today}/{website_id}/{title}'
+    Path(parent).mkdir(parents=True, exist_ok=True)
+    if flag:
+        pass
+
     return parent
 
 
