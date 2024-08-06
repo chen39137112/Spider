@@ -65,10 +65,9 @@ class Spider:
 
             cursor.execute("SELECT timeSwitch FROM reptile_timeswitch ORDER BY timeSwitch")
             times = [_[0].total_seconds() for _ in cursor.fetchall()]
-            # 防止有0点导致无法触发
-            if times[0] == 0:
-                times.pop(0)
-                times.append(timedelta(hours=24).total_seconds())
+            # 防止有0点附近的时刻，导致无法触发
+            if times[0] <= 60:
+                times.append(timedelta(hours=24).total_seconds() + times[0])
             times = [t - seconds for t in times]
 
             t = times.pop()

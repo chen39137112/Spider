@@ -58,13 +58,10 @@ def get_zb_ask(content: str):
 
     if len(zb_num) == 1:
         nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
-        linefeed = zb_num + sub_str[match.end()]
     elif len(zb_num) == 2 and zb_num[0] == '0':
         nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
-        linefeed = zb_num[1] + sub_str[match.end()]
     elif len(zb_num) == 3:
         nx_num = str(float(zb_num) + 0.1)
-        linefeed = zb_num
     else:
         logger.warning('非预期中的投标资格编号！')
         return ''
@@ -78,7 +75,7 @@ def get_zb_ask(content: str):
         s = ret[i]
         if s == '；' or s == '。' or s == '：':
             i += 1
-            ret = ret[:i] + '\n' + ret[i:]
+            ret = ret[:i] + '\n' + ret[i:].strip()
         i += 1
     return ret
 
@@ -132,9 +129,13 @@ def download_annex_2_local(tab, website_id, title, flag):
     today = datetime.today().strftime('%Y-%m-%d')
     parent = f'./annex/{today}/{website_id}/{title}'
     Path(parent).mkdir(parents=True, exist_ok=True)
-    if flag:
-        pass
 
+    dst_file = parent + '/附件.pdf'
+    if flag:
+        src_file = f'./tmp/{title}.pdf'
+        os.rename(src_file, dst_file)
+    else:
+        tab('#download').click.to_download('./tmp', f'{title}.pdf')
     return parent
 
 
