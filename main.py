@@ -4,7 +4,7 @@ import time
 
 from cnncecp import Cnncecp
 from espic import Espic
-from utils import get_driver, connect_db
+from utils import get_driver, connect_db, clean_annex
 
 method_tab = {
     "中核集团": Cnncecp,
@@ -100,6 +100,8 @@ class Spider:
 
             for t in threads:
                 t.join()
+
+            clean_annex()
 
 
 if __name__ == '__main__':

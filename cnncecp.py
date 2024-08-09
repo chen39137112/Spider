@@ -41,8 +41,9 @@ class Cnncecp:
 
         pages = tab.eles('.page')
         texts = []
-        title = ele.ele('tag:a').text
+        title = tab.ele('tag:h1').text
         dl_flag = False
+        pages[0].scroll.to_see()
         if len(pages[0].ele('.textLayer').children()) == 1:
             # 无text，下载pdf
             download = tab('#download').click.to_download('./tmp', f'{title}.pdf')
@@ -74,7 +75,7 @@ class Cnncecp:
         main_info = RecordMain(website_id=self.id,
                                reptile_keywords=keywords,
                                title=title,
-                               website_time=datetime.strptime(ele.ele('.newsDate').text, '%Y-%m-%d'),
+                               website_time=datetime.strptime(ele.ele('.Right Gray').text, '%Y-%m-%d'),
                                website_url=url
                                )
         content_info = RecordContent(zb_ask=get_zb_ask(content), reptile_content=string_truncate(content))
@@ -137,4 +138,4 @@ if __name__ == '__main__':
     keywords = ["软件", "设计"]
     ex_keys = ['中标公告']
     espid = Cnncecp(website_id, driver, last_bid_num, keywords, ex_keys, 2)
-    espid.run()
+    espid.run(1)

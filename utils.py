@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 import logging
 import logging.handlers
 from pathlib import Path
@@ -6,6 +7,7 @@ from functools import wraps
 import traceback
 import re
 import os
+import shutil
 
 from DrissionPage import ChromiumPage, ChromiumOptions
 import pymysql
@@ -55,11 +57,12 @@ def get_zb_ask(content: str):
     if not match:
         return ''
     zb_num = match.group()
+    suffix = '招标文件的获取' if len(sub_str) == match.end() else sub_str[match.end()]
 
     if len(zb_num) == 1:
-        nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
+        nx_num = str(int(zb_num) + 1) + suffix
     elif len(zb_num) == 2 and zb_num[0] == '0':
-        nx_num = str(int(zb_num) + 1) + sub_str[match.end()]
+        nx_num = str(int(zb_num) + 1) + suffix
     elif len(zb_num) == 3:
         nx_num = str(float(zb_num) + 0.1)
     else:
@@ -130,13 +133,37 @@ def download_annex_2_local(tab, website_id, title, flag):
     parent = f'./annex/{today}/{website_id}/{title}'
     Path(parent).mkdir(parents=True, exist_ok=True)
 
+    src_file = f'./tmp/{title}.pdf'
     dst_file = parent + '/附件.pdf'
-    if flag:
-        src_file = f'./tmp/{title}.pdf'
-        os.rename(src_file, dst_file)
-    else:
-        tab('#download').click.to_download('./tmp', f'{title}.pdf')
+
+    try:
+        if flag:
+            os.rename(src_file, dst_file)
+        else:
+            tab('#download').click.to_download(parent, '/附件.pdf')
+    except FileExistsError:
+        logger.info('文件已存在')
+        os.remove(src_file)
     return parent
+
+
+def clean_annex(date=30):
+    """
+    清理annex和tmp目录
+    :param date: annex清理保存期限
+    :return:
+    """
+    today = datetime.today()
+
+    for d in os.listdir('./annex'):
+        if today - datetime.strptime(d, '%Y-%m-%d') > timedelta(days=date):
+            shutil.rmtree(d)
+
+    try:
+        shutil.rmtree('./tmp')
+        os.makedirs('./tmp')
+    except Exception as e:
+        logger.error(f"清空目录时发生错误: {e}")
 
 
 def get_driver(port):
@@ -148,15 +175,15 @@ def get_driver(port):
         browser_path = "/usr/bin/google-chrome"
         useragent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
 
-    co.headless(True)
+    # co.headless(True)
     co.set_browser_path(browser_path)
     co.set_user_agent(user_agent=useragent)
     co.set_argument('--incognito')
     co.set_argument('--no-sandbox')
-    co.no_imgs(True)
+    # co.no_imgs(True)
 
     driver = ChromiumPage(co)
-    driver.set.blocked_urls('*.css*')
+    # driver.set.blocked_urls('*.css*')
     return driver
 
 
